@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <!-- 모바일 화면 크기에 맞게 뷰포트 설정 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>검색 결과</title>
+    <style>
+        /* 전체 페이지 기본 스타일 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Apple SD Gothic Neo', sans-serif;
+            background: #f0f0f0;
+            padding: 16px;
+        }
+
+        /* 상단 제목 */
+        h1 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        /* 섹션 구분선 제목 */
+        .section-title {
+            font-size: 13px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 0 10px;
+            padding-left: 4px;
+        }
+
+        /* 입력 이미지 카드 */
+        .query-card {
+            background: white;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        /* 입력 이미지 */
+        .query-card img {
+            width: 100%;
+            max-height: 220px;
+            object-fit: contain;
+            border-radius: 10px;
+            display: block;
+        }
+
+        /* 결과 카드 공통 스타일 */
+        .result-card {
+            background: white;
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            position: relative;         /* 순위 배지 위치 기준 */
+        }
+
+        /* 결과 이미지: 순위별로 높이가 다르게 설정됨 (인라인 style로 전달) */
+        .result-card img {
+            width: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
+        }
+
+        /* 이미지 아래 정보 영역 */
+        .result-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding: 0 2px;
+        }
+
+        /* 카테고리 이름 */
+        .result-name {
+            font-size: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* 유사도 점수 */
+        .result-score {
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            background: #4CAF50;
+            padding: 4px 10px;
+            border-radius: 20px;        /* 알약 모양 뱃지 */
+        }
+
+        /* 순위 배지 (1위, 2위, 3위) */
+        .rank-badge {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;         /* 원형 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            z-index: 1;                 /* 이미지 위에 표시 */
+        }
+
+        /* 1위: 금색 */
+        .rank-1 { background: #FFD700; color: #333; }
+        /* 2위: 은색 */
+        .rank-2 { background: #B0B0B0; }
+        /* 3위: 동색 */
+        .rank-3 { background: #CD7F32; }
+
+        /* 다시 검색 버튼 */
+        .btn-back {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: bold;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            text-align: center;
+            text-decoration: none;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>검색 결과</h1>
+
+    <!-- 입력 이미지 표시 -->
+    <p class="section-title">입력 이미지</p>
+    <div class="query-card">
+        <img src="{{ query_img }}" alt="업로드한 이미지">
+    </div>
+
+    <!-- 유사 이미지 결과: 1위가 가장 크고 순서대로 작아짐 -->
+    <p class="section-title">유사한 이미지 Top 3</p>
+
+    {% for item in items %}
+    <div class="result-card">
+
+        <!-- 순위 배지: loop.index = 1, 2, 3 -->
+        <div class="rank-badge rank-{{ loop.index }}">{{ loop.index }}</div>
+
+        <!--
+            이미지 높이를 순위별로 다르게 설정
+            1위: 320px (가장 크게)
+            2위: 230px (중간)
+            3위: 160px (가장 작게)
+            loop.index를 이용해 인라인 스타일로 높이 조절
+        -->
+        {% if loop.index == 1 %}
+            <img src="/train-img/{{ item.uri }}"
+                 alt="{{ item.name }}"
+                 style="height: 320px;">
+        {% elif loop.index == 2 %}
+            <img src="/train-img/{{ item.uri }}"
+                 alt="{{ item.name }}"
+                 style="height: 230px;">
+        {% else %}
+            <img src="/train-img/{{ item.uri }}"
+                 alt="{{ item.name }}"
+                 style="height: 160px;">
+        {% endif %}
+
+        <!-- 카테고리 이름과 유사도 점수 -->
+        <div class="result-info">
+            <span class="result-name">{{ item.name }}</span>
+            <span class="result-score">{{ item.score }}%</span>
+        </div>
+
+    </div>
+    {% endfor %}
+
+    <!-- 메인으로 돌아가기 버튼 -->
+    <a href="/" class="btn-back">← 다시 검색하기</a>
+
+</body>
+</html>

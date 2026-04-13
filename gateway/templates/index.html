@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <!-- 모바일 화면 크기에 맞게 뷰포트 설정 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가구 이미지 검색</title>
+    <style>
+        /* 전체 페이지 기본 스타일 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Apple SD Gothic Neo', sans-serif;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;          /* 화면 전체 높이 사용 */
+            padding: 20px;
+        }
+
+        /* 카드 형태의 컨테이너 */
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        /* 상단 아이콘 */
+        .icon {
+            font-size: 64px;
+            margin-bottom: 12px;
+        }
+
+        /* 제목 */
+        h2 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        /* 부제목 설명 */
+        .desc {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 28px;
+        }
+
+        /* 기본 file input 숨기기 (커스텀 버튼으로 대체) */
+        #file-input {
+            display: none;
+        }
+
+        /* 카메라 촬영 버튼 */
+        .btn-camera {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 12px;
+        }
+
+        /* 갤러리에서 선택 버튼 */
+        .btn-gallery {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: bold;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 24px;
+        }
+
+        /* 미리보기 영역 (이미지 선택 전에는 숨김) */
+        #preview-area {
+            display: none;
+            margin-bottom: 20px;
+        }
+
+        /* 선택된 이미지 미리보기 */
+        #preview-img {
+            width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+        }
+
+        /* 선택된 파일명 표시 */
+        #file-name {
+            font-size: 13px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        /* 검색하기 버튼 (이미지 선택 후 표시) */
+        .btn-submit {
+            display: none;               /* 기본적으로 숨김 */
+            width: 100%;
+            padding: 18px;
+            font-size: 20px;
+            font-weight: bold;
+            background: #FF5722;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 상단 카메라 아이콘 -->
+        <div class="icon">📷</div>
+        <h2>가구 이미지 검색</h2>
+        <p class="desc">사진을 찍거나 갤러리에서 선택하면<br>유사한 가구를 찾아드립니다</p>
+
+        <form id="search-form" action="/search" method="post" enctype="multipart/form-data">
+            <!-- 실제 파일 입력 (숨김 처리) -->
+            <!-- accept="image/*": 이미지 파일만 허용 -->
+            <input type="file" id="file-input" name="image" accept="image/*">
+
+            <!-- 카메라로 바로 촬영하는 버튼 -->
+            <!-- onclick으로 숨겨진 file input에 capture 속성을 추가하여 카메라 실행 -->
+            <button type="button" class="btn-camera" onclick="openCamera()">
+                📸 카메라로 촬영하기
+            </button>
+
+            <!-- 갤러리에서 사진을 선택하는 버튼 -->
+            <button type="button" class="btn-gallery" onclick="openGallery()">
+                🖼️ 갤러리에서 선택하기
+            </button>
+
+            <!-- 이미지 선택 후 미리보기 영역 -->
+            <div id="preview-area">
+                <img id="preview-img" src="" alt="선택된 이미지 미리보기">
+                <p id="file-name"></p>
+            </div>
+
+            <!-- 이미지 선택 후 나타나는 검색 버튼 -->
+            <button type="submit" class="btn-submit" id="btn-submit">
+                🔍 유사한 가구 검색하기
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // 카메라로 바로 촬영하는 함수
+        function openCamera() {
+            const input = document.getElementById('file-input');
+            input.setAttribute('capture', 'environment'); // 후면 카메라 실행
+            input.click(); // file input 클릭하여 카메라 실행
+        }
+
+        // 갤러리에서 사진을 선택하는 함수
+        function openGallery() {
+            const input = document.getElementById('file-input');
+            input.removeAttribute('capture'); // capture 속성 제거하면 갤러리로 열림
+            input.click(); // file input 클릭하여 갤러리 실행
+        }
+
+        // 파일이 선택되면 미리보기와 검색 버튼 표시
+        document.getElementById('file-input').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // FileReader로 이미지를 읽어 미리보기에 표시
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                document.getElementById('preview-img').src = event.target.result;
+                document.getElementById('preview-area').style.display = 'block'; // 미리보기 표시
+                document.getElementById('file-name').textContent = `선택된 파일: ${file.name}`;
+                document.getElementById('btn-submit').style.display = 'block'; // 검색 버튼 표시
+            };
+            reader.readAsDataURL(file); // 이미지 파일을 Base64로 읽기
+        });
+    </script>
+</body>
+</html>

@@ -66,6 +66,10 @@ furniture-visual-search/
 ├── sofa/
 └── ...
 
+---
+
+## ⚙️ img 자료 
+https://www.kaggle.com/datasets/akkithetechie/furniture-detector 
 
 ---
 
